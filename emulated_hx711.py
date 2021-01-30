@@ -82,7 +82,6 @@ class HX711:
         # Read out a set of raw bytes and throw it away.
         self.readRawBytes()
 
-        
     def get_gain(self):
         if self.GAIN == 1:
             return 128
@@ -94,7 +93,6 @@ class HX711:
         # Shouldn't get here.
         return 0
         
-
     def readRawBytes(self):
         # Wait for and get the Read Lock, incase another thread is already
         # driving the virtual HX711 serial interface.
@@ -129,7 +127,6 @@ class HX711:
     def read_long(self):
         # Get a sample from the HX711 in the form of raw bytes.
         dataBytes = self.readRawBytes()
-
 
         if self.DEBUG_PRINTING:
             print(dataBytes,)
@@ -219,7 +216,7 @@ class HX711:
         # Restore the reference unit, now that we've got our offset.
         self.set_reference_unit(reference_unit)
 
-        return value;
+        return value
 
     
     def set_reading_format(self, byte_format="LSB", bit_format="MSB"):
