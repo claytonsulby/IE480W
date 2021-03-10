@@ -111,6 +111,7 @@ def sending_error():
     email_session.sendmail(sender_email,receiver_email,my_message)
     email_session.quit()
 
+
 def main():
     hx = HX711(5, 6)
 

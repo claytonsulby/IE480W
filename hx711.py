@@ -1,5 +1,3 @@
-#
-
 import RPi.GPIO as GPIO
 import time
 import threading
@@ -39,8 +37,7 @@ class HX711:
 
         self.set_gain(gain)
 
-        # Think about whether this is necessary.
-        time.sleep(1)
+        time.sleep(1) #TODO: Think about whether this is necessary.
 
         
     def convertFromTwosComplement24bit(self, inputValue):
@@ -78,6 +75,7 @@ class HX711:
         
 
     def readNextBit(self):
+        
        # Clock HX711 Digital Serial Clock (PD_SCK).  DOUT will be
        # ready 1us after PD_SCK rising edge, so we sample after
        # lowering PD_SCL, when we know DOUT will be stable.
