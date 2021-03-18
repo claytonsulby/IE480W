@@ -13,6 +13,8 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 
+import pymysql
+
 import RPi.GPIO as GPIO
 from hx711 import HX711
 
@@ -21,7 +23,7 @@ TWOCHANNEL = False
 
 sender_email = 'psu.prescriptiondropbox@gmail.com'
 password = 'Password1!2@3#'
-receiver_email = 'emailsurajmanoj@gmail.com'
+receiver_email = 'claytonsulby@gmail.com'
 
 referenceUnit = 387.018518
 
@@ -157,7 +159,12 @@ def main():
     #use new location to email to her 
     ##############################################################################################
 
+    hostname = '70.32.23.81'
+    username = 'psupresc_admin'
+    password = 'nipdy1-zagpos-nuHxoz'
+    database = 'psupresc_dropbox'
 
+    A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
 
     # csv file name
     filename = "log.csv"
@@ -196,8 +203,18 @@ def main():
                 timeStamp = datetime.datetime.now()         #finding the time
 
                 row_contents = [timeStamp.strftime("%x"),timeStamp.strftime("%X"),str(roundedDiff)]       #setting the values for the new row entry
-
                 append_list_as_row(filename, row_contents)      #appending new row entry to the log.csv
+
+                cur = A2_connection.cursor()
+                A2_sql_insert = insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (timeStamp.strftime("%Y-%m-%d"), timeStamp.strftime("%H:%M:%S"), float(roundedDiff))
+                commit = "COMMIT;"
+
+                print(A2_sql_insert)
+
+                cur.execute( A2_sql_insert )
+                cur.execute( commit )
+
+                
                 
                 count+=1                       #counts the number of drops and 
 
