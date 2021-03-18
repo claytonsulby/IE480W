@@ -3,15 +3,9 @@
 import time
 import sys
 
-import csv 
-from csv import writer
-import datetime
+from datetime import datetime
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+from smtp import *
 
 import pymysql
 
@@ -21,9 +15,7 @@ from hx711 import HX711
 DEBUG = False
 TWOCHANNEL = False
 
-sender_email = 'psu.prescriptiondropbox@gmail.com'
-password = 'Password1!2@3#'
-receiver_email = 'claytonsulby@gmail.com'
+
 
 referenceUnit = 387.018518
 
@@ -36,82 +28,6 @@ def cleanAndExit():
     print("Bye!")
     sys.exit()
 
-
-def append_list_as_row(file_name, list_of_elem):
-    # Open file in append mode
-    with open(file_name, 'a+', newline='') as write_obj:
-        # Create a writer object from csv module
-        csv_writer = writer(write_obj)
-        # Add contents of list as last row in the csv file
-        csv_writer.writerow(list_of_elem)
-
-
-
-def sending_csv (file):
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["To"] = receiver_email
-    monthStamp = datetime.datetime.now()         #finding the time
-    monthStamp = monthStamp.strftime("%B %Y")
-
-    message["Subject"] = monthStamp + " Dropbox Log Update"     #find correct month and year
-
-    attachment = open(file, 'rb') 
-
-    obj = MIMEBase('application','octet-stream')
-
-    obj.set_payload((attachment).read())
-    encoders.encode_base64(obj)
-    obj.add_header('Content-Disposition',"attachment; filename= "+file)
-
-    message.attach(obj)
-
-    my_message = message.as_string()
-
-    email_session = smtplib.SMTP('smtp.gmail.com',587)
-    email_session.ehlo()
-    email_session.starttls()
-    email_session.login(sender_email, password)
-
-    email_session.sendmail(sender_email,receiver_email,my_message)
-    email_session.quit()
-
-
-
-def sending_reminder():
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["To"] = receiver_email
-    message["Subject"] = "Empty Prescription DropBox"
-
-    Body = "30+ Prescription drops have been made! Please empty as soon as possible."
-    
-
-    email_session = smtplib.SMTP('smtp.gmail.com',587)
-    email_session.ehlo()
-    email_session.starttls()
-    email_session.login(sender_email, password)
-
-    email_session.sendmail(sender_email,receiver_email, Body)
-    email_session.quit()
-
-
-
-def sending_error():
-    message = MIMEMultipart()
-    message["From"] = sender_email
-    message["To"] = receiver_email
-    message["Subject"] = "Reset System ASAP"
-
-    my_message = "The Raspberry Pi has malfunctioned and needs to be reset as soon as possible. Please press the power button twice so that the red light turns off and on again.\n\nThank you!"
-
-    email_session = smtplib.SMTP('smtp.gmail.com',587)
-    email_session.ehlo()
-    email_session.starttls()
-    email_session.login(sender_email, password)
-
-    email_session.sendmail(sender_email,receiver_email,my_message)
-    email_session.quit()
 
 
 def main():
@@ -192,15 +108,15 @@ def main():
             # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
             val = hx.get_weight(5)
             lb = val*.0022
-            print(lb)
-
             diff = lb - prev
 
-            if diff > .05:              #accounting for fluxuations from weight sensor readings
+            print("[log][%s] raw val: %f, lb: %f, prev: %f, diff: %1.2f" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), val, lb, prev, diff))
+
+            if diff > .01:              #accounting for fluxuations from weight sensor readings
 
                 roundedDiff = round(diff,2)
 
-                timeStamp = datetime.datetime.now()         #finding the time
+                timeStamp = datetime.now()         #finding the time
 
                 row_contents = [timeStamp.strftime("%x"),timeStamp.strftime("%X"),str(roundedDiff)]       #setting the values for the new row entry
                 append_list_as_row(filename, row_contents)      #appending new row entry to the log.csv
@@ -214,15 +130,26 @@ def main():
                 cur.execute( A2_sql_insert )
                 cur.execute( commit )
 
+
+                select = "SELECT * FROM t1;"
+                cur.execute( select )
+
+                print("–––––––––––––––––––––––––––––––––")
+                print("|","date","|","time","|","weight","|")
+                print("–––––––––––––––––––––––––––––––––")
+                for x in cur.fetchall():
+                    print("|",x[0],"|",x[1],"|",x[2],"|")
+                print("–––––––––––––––––––––––––––––––––")
+
                 
                 
-                count+=1                       #counts the number of drops and 
+                # count+=1                       #counts the number of drops and 
 
 
 
-            if count == 30:             #send reminder to empty box
-                sending_reminder()
-                count -= 5
+            # if count == 30:             #send reminder to empty box
+            #     sending_reminder()
+            #     count -= 5
 
             prev = lb
 
@@ -233,20 +160,20 @@ def main():
             #print "A: %s  B: %s" % ( val_A, val_B )
             hx.power_down()
             hx.power_up()
-            time.sleep(15)
+            # time.sleep(15) #NOTE: fix this, too long in between weight calculations
 
-            if datetime.datetime.today().day == 1 and flag == 0:                            #send the csv email once on the First of every Month
-                sending_csv(filename)
-                flag = 1
-            elif datetime.datetime.today().day == 2 and flag == 1:                          #reset the flag on the day after
-                flag = 0
+            # if datetime.datetime.today().day == 1 and flag == 0:                            #send the csv email once on the First of every Month
+            #     sending_csv(filename)
+            #     flag = 1
+            # elif datetime.datetime.today().day == 2 and flag == 1:                          #reset the flag on the day after
+            #     flag = 0
 
 
-            if count > 0 and lb < .03 :
-                time.sleep(300)
-                hx.reset()          #if officer meyer removes bin, give her 5 min to empty and replace bins. Then tare system and continue
-                hx.tare()
-                count = 0 
+            # if count > 0 and lb < .03 :
+            #     time.sleep(300)
+            #     hx.reset()          #if officer meyer removes bin, give her 5 min to empty and replace bins. Then tare system and continue
+            #     hx.tare()
+            #     count = 0 
 
             #sending_csv(filename)
 
