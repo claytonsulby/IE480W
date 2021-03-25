@@ -2,6 +2,7 @@
 from tkinter import *
 from tkcalendar import Calendar
 from datetime import datetime
+import csv
 
 import pymysql
 
@@ -19,9 +20,8 @@ if __name__ == "__main__":
     
     # Add Calender
     cal = Calendar(root, selectmode = 'day',
-                year = 2020, month = 5,
-                day = 22)
-    
+                year = datetime.now().year, month = datetime.now().month,
+                day = datetime.now().day)
     cal.pack(pady = 20)
     
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         cur = conn.cursor()
         
         tempStartDate = datetime.strptime(startDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
-        tempEndDate = datetime.strptime(startDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
+        tempEndDate = datetime.strptime(endDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
         
         
         # select = "\
@@ -103,18 +103,19 @@ if __name__ == "__main__":
         #     ENCLOSED BY '\"' \
         #     LINES TERMINATED BY '\n';"
         
-        select = "SELECT * FROM t1 WHERE (date BETWEEN '%s' AND '%s');" % (tempStartDate, tempEndDate)
+        select = "SELECT * FROM t1 WHERE date BETWEEN '%s' AND '%s';" % (tempStartDate, tempEndDate)
         
         # select = "SELECT * FROM t1;"
         
         cur.execute(select)
-        
-        print("–––––––––––––––––––––––––––––––––")
-        print("|","date","|","time","|","weight","|")
-        print("–––––––––––––––––––––––––––––––––")
-        for x in cur.fetchall():
-            print("|",x[0],"|",x[1],"|",x[2],"|")
-        print("–––––––––––––––––––––––––––––––––")
+
+        with open('log.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(['report date', 'date', 'time', 'weight'])
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            for x in cur.fetchall():
+                
+                writer.writerow([now] + list(x))
         
         
 
