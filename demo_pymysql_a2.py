@@ -21,11 +21,11 @@ commit = "COMMIT;"
 def doQuery( conn ) :
     cur = conn.cursor()
 
-    for i in range(0, 5):
-        insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (datetime.now().strftime("%Y-%m-%d"), datetime.now().strftime("%H:%M:%S"), float(decimal.Decimal(random.randrange(155, 389))/400))
-        cur.execute( insert )
+    # for i in range(0, 5):
+    #     insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (datetime.now().strftime("%Y-%m-%d"), datetime.now().strftime("%H:%M:%S"), float(decimal.Decimal(random.randrange(155, 389))/400))
+    #     cur.execute( insert )
         
-    cur.execute( commit )
+    # cur.execute( commit )
     cur.execute( select )
 
     print("–––––––––––––––––––––––––––––––––")

@@ -2,12 +2,12 @@
 
 import time
 import sys
-
 from datetime import datetime
 
-from smtp import *
-
 import pymysql
+
+from smtp import *
+#from log import *
 
 import RPi.GPIO as GPIO
 from hx711 import HX711
@@ -95,6 +95,7 @@ def main():
 
 
     while True:
+        
         try:
             # These three lines are usefull to debug wether to use MSB or LSB in the reading formats
             # for the first parameter of "hx.set_reading_format("LSB", "MSB")".
