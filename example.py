@@ -7,7 +7,7 @@ from datetime import datetime
 import pymysql
 
 from smtp import *
-#from log import *
+from log import *
 
 import RPi.GPIO as GPIO
 from hx711 import HX711
@@ -21,11 +21,11 @@ referenceUnit = 387.018518
 
 
 def cleanAndExit():
-    print("Cleaning...")
+    log("DEBUG", "Cleaning...")
 
     GPIO.cleanup()
         
-    print("Bye!")
+    log("DEBUG", "Bye!")
     sys.exit()
 
 
@@ -64,7 +64,7 @@ def main():
     else:
         hx.tare()
 
-    print("Tare done! Add weight now...")
+    log("DEBUG", "Tare done! Add weight now...")
 
 
 
@@ -111,7 +111,7 @@ def main():
             lb = val*.0022
             diff = lb - prev
 
-            print("[log][%s] raw val: %f, lb: %f, prev: %f, diff: %1.2f" % (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), val, lb, prev, diff))
+            log("DEBUG", "raw value: %f, lb: %f, prev: %f, diff: %1.2f" % (val, lb, prev, diff))
 
             if diff > .01:              #accounting for fluxuations from weight sensor readings
 
@@ -144,13 +144,13 @@ def main():
 
                 
                 
-                # count+=1                       #counts the number of drops and 
+                count+=1                       #counts the number of drops and 
 
 
 
-            # if count == 30:             #send reminder to empty box
-            #     sending_reminder()
-            #     count -= 5
+            if count == 30:             #send reminder to empty box
+                sending_reminder()
+                count -= 5
 
             prev = lb
 
@@ -159,24 +159,25 @@ def main():
             #val_A = hx.get_weight_A(5)
             #val_B = hx.get_weight_B(5)
             #print "A: %s  B: %s" % ( val_A, val_B )
+            
             hx.power_down()
             hx.power_up()
-            # time.sleep(15) #NOTE: fix this, too long in between weight calculations
+            time.sleep(15) #NOTE: fix this, too long in between weight calculations
 
-            # if datetime.datetime.today().day == 1 and flag == 0:                            #send the csv email once on the First of every Month
-            #     sending_csv(filename)
-            #     flag = 1
-            # elif datetime.datetime.today().day == 2 and flag == 1:                          #reset the flag on the day after
-            #     flag = 0
+            if datetime.datetime.today().day == 1 and flag == 0:                            #send the csv email once on the First of every Month
+                sending_csv(filename)
+                flag = 1
+            elif datetime.datetime.today().day == 2 and flag == 1:                          #reset the flag on the day after
+                flag = 0
 
 
-            # if count > 0 and lb < .03 :
-            #     time.sleep(300)
-            #     hx.reset()          #if officer meyer removes bin, give her 5 min to empty and replace bins. Then tare system and continue
-            #     hx.tare()
-            #     count = 0 
+            if count > 0 and lb < .03 :
+                time.sleep(300)
+                hx.reset()          #if officer meyer removes bin, give her 5 min to empty and replace bins. Then tare system and continue
+                hx.tare()
+                count = 0 
 
-            #sending_csv(filename)
+            sending_csv(filename)
 
         except (KeyboardInterrupt, SystemExit):
             sending_error()                  #if moving log.py, make sure to use full directory in place of filename

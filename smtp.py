@@ -10,7 +10,7 @@ from email import encoders
 
 
 sender_email = 'psu.prescriptiondropbox@gmail.com'
-password = 'Password1!2@3#'
+password = 'xafze5-tAsted-jaznix'
 receiver_email = 'claytonsulby@gmail.com'
 
 def append_list_as_row(file_name, list_of_elem):

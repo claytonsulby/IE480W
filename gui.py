@@ -1,6 +1,7 @@
 # Import Required Library
 from tkinter import *
 from tkcalendar import Calendar
+import tksheet
 from datetime import datetime
 import csv
 
@@ -10,22 +11,20 @@ import pymysql
 startDate = ""
 endDate = ""
 
+report = []
+
 if __name__ == "__main__":
 
-    # Create Object
-    root = Tk()
-    
-    # Set geometry
-    root.geometry("400x800")
-    
-    # Add Calender
-    cal = Calendar(root, selectmode = 'day',
-                year = datetime.now().year, month = datetime.now().month,
-                day = datetime.now().day)
-    cal.pack(pady = 20)
-    
+    def updateList():
+        listbox.delete(0, END)
+        list = selectToCSV()
+        i = 0
+        listbox.insert(END, ['index', 'date', 'time', 'weight'])
+        for row in list:
+            x = [i] + row[1:]
+            listbox.insert(END, x)
+            i += 1
 
-    
     def setStartDate():
         """ 
         Gets the startDate from the calendar.
@@ -71,9 +70,6 @@ if __name__ == "__main__":
         return endDate
     
     def selectToCSV():
-        # SELECT *
-        # FROM `objects`
-        # WHERE (date_field BETWEEN '2010-01-30 14:15:55' AND '2010-09-29 10:15:55')
         global startDate
         global endDate
         
@@ -88,47 +84,24 @@ if __name__ == "__main__":
         tempStartDate = datetime.strptime(startDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
         tempEndDate = datetime.strptime(endDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
         
-        
-        # select = "\
-        #     SELECT * FROM t1 \
-        #     WHERE (date BETWEEN '%s' AND '%s') \
-        #     INTO OUTFILE './log.csv' \
-        #     FIELDS TERMINATED BY ',' \
-        #     ENCLOSED BY '\"' \
-        #     LINES TERMINATED BY '\n';" % (tempStartDate, tempEndDate)
-        
-        # select = "SELECT * FROM t1\
-        #     INTO OUTFILE './log.csv' \
-        #     FIELDS TERMINATED BY ',' \
-        #     ENCLOSED BY '\"' \
-        #     LINES TERMINATED BY '\n';"
-        
         select = "SELECT * FROM t1 WHERE date BETWEEN '%s' AND '%s';" % (tempStartDate, tempEndDate)
         
         # select = "SELECT * FROM t1;"
         
         cur.execute(select)
 
-        with open('log.csv', 'w', newline='') as csvfile:
+        output = []
+
+
+        with open('report.csv', 'w', newline='') as csvfile:
             writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(['report date', 'date', 'time', 'weight'])
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for x in cur.fetchall():
-                
+                output.append([now] + list(x))
                 writer.writerow([now] + list(x))
         
-        
-
-    def grad_date():
-        date.config(text = "Selected Date is: " + cal.get_date())
-    
-    # Add Button and Label
-    Button(root, text = "Get Date",
-        command = grad_date).pack(pady = 20)
-    
-    date = Label(root, text = "")
-    date.pack(pady = 20)
-
+        return output
 
     def startDateButtonCommand():
         
@@ -138,6 +111,9 @@ if __name__ == "__main__":
         setStartDate()
         startDateLabel.config(text = startDate)
         
+        report.append("[REPORT] Start Date: %s" % startDate)
+        root.update()
+        
     def endDateButtonCommand():
         
         global startDate
@@ -145,16 +121,60 @@ if __name__ == "__main__":
         
         setEndDate()
         endDateLabel.config(text = endDate)
+        
+        report.append("[report] End Date: %s" % endDate)
+        root.update()
+        
+    def queryButtonCommand():
+        
+        global startDate
+        global endDate
+
+        updateList()
 
 
-    startDateLabel = Label(root, text = "")
-    startDateLabel.pack()
-    Button(root,text="Start Date",command= lambda: startDateButtonCommand()).pack()
-    endDateLabel = Label(root, text = "")
-    endDateLabel.pack()
-    Button(root,text="End Date",command= lambda: endDateButtonCommand()).pack(pady = 20)
+    # Create window object
+    root = Tk()
     
-    Button(root,text="Query",command= lambda: selectToCSV()).pack()
+    # Calender
+    cal = Calendar(root, selectmode = 'day',year = datetime.now().year, month = datetime.now().month,day = datetime.now().day)
+    
+    
+    startButton = Button(root,text="Start Date",command= lambda: startDateButtonCommand())
+    startDateLabel = Label(root, text = "")
+    
+    
+    endButton = Button(root,text="End Date", background='white',command= lambda: endDateButtonCommand())
+    endDateLabel = Label(root, text = "")
+    
+
+    
+    queryButton = Button(root,text="Query",command= lambda: queryButtonCommand())
+    
+    
+    listbox = Listbox(root, height=8, width=50, border=0)
+    scrollbar = Scrollbar(root)
+    
+    listbox.configure(yscrollcommand=scrollbar.set)
+    scrollbar.configure(command=listbox.yview)
+    
+    
+    
+    cal.grid(row=0, column=0, rowspan = 3, columnspan=2)
+    
+    startDateLabel.grid(row=0, column=4, sticky=NW)
+    endDateLabel.grid(row=1, column=4,sticky=NW)
+    
+    startButton.grid(row=0, column=3, sticky=NW)
+    endButton.grid(row=1, column=3, sticky=NW)
+    
+    queryButton.grid(row=3, column=3, columnspan=2)
+    
+    listbox.grid(row=4, column=0, columnspan=4, rowspan=6, sticky=NS)
+    scrollbar.grid(row=4, rowspan=6, column=4, sticky=NS)
+    
+    root.title('Opioid Takeback Query')
+    root.geometry('500x350')
     
     # Excecute Tkinter
     root.mainloop()
