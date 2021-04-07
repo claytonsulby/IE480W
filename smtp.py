@@ -27,12 +27,12 @@ def sending_csv (file):
     message = MIMEMultipart()
     message["From"] = sender_email
     message["To"] = receiver_email
-    monthStamp = datetime.datetime.now()         #finding the time
+    monthStamp = datetime.now()         #finding the time
     monthStamp = monthStamp.strftime("%B %Y")
 
     message["Subject"] = monthStamp + " Dropbox Log Update"     #find correct month and year
 
-    attachment = open(file, 'rb') 
+    attachment = open(file, 'rb')
 
     obj = MIMEBase('application','octet-stream')
 

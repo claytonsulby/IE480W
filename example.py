@@ -80,6 +80,7 @@ def main():
     password = 'nipdy1-zagpos-nuHxoz'
     database = 'psupresc_dropbox'
 
+    log("DEBUG", "Initializing Connection to host:%s db:%s user:%s" % (hostname, database, username))
     A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
 
     # csv file name
@@ -93,7 +94,7 @@ def main():
     flag = 0
 
 
-
+    log("DEBUG", "Beginning main() loop")
     while True:
         
         try:
@@ -104,8 +105,9 @@ def main():
             if DEBUG:
                 np_arr8_string = hx.get_np_arr8_string()
                 binary_string = hx.get_binary_string()
-                print(binary_string + " " + np_arr8_string)
+                log("DEBUG", binary_string + " " + np_arr8_string)
             
+            log("DEBUG", "Getting weight...")
             # Prints the weight. Comment if you're debbuging the MSB and LSB issue.
             val = hx.get_weight(5)
             lb = val*.0022
@@ -115,44 +117,51 @@ def main():
 
             if diff > .01:              #accounting for fluxuations from weight sensor readings
 
+                log("DEBUG", "Weight threshold met.")
+
                 roundedDiff = round(diff,2)
 
                 timeStamp = datetime.now()         #finding the time
 
                 row_contents = [timeStamp.strftime("%x"),timeStamp.strftime("%X"),str(roundedDiff)]       #setting the values for the new row entry
+                log("DEBUG", "Row Contents:" + ", ".join(row_contents))
+
                 append_list_as_row(filename, row_contents)      #appending new row entry to the log.csv
 
                 cur = A2_connection.cursor()
                 A2_sql_insert = insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (timeStamp.strftime("%Y-%m-%d"), timeStamp.strftime("%H:%M:%S"), float(roundedDiff))
                 commit = "COMMIT;"
 
-                print(A2_sql_insert)
+                log("DEBUG", "Executing SQL Insert" + A2_sql_insert)
 
                 cur.execute( A2_sql_insert )
                 cur.execute( commit )
 
 
-                select = "SELECT * FROM t1;"
-                cur.execute( select )
+                # select = "SELECT * FROM t1;"
+                # cur.execute( select )
 
-                print("–––––––––––––––––––––––––––––––––")
-                print("|","date","|","time","|","weight","|")
-                print("–––––––––––––––––––––––––––––––––")
-                for x in cur.fetchall():
-                    print("|",x[0],"|",x[1],"|",x[2],"|")
-                print("–––––––––––––––––––––––––––––––––")
+                # print("–––––––––––––––––––––––––––––––––")
+                # print("|","date","|","time","|","weight","|")
+                # print("–––––––––––––––––––––––––––––––––")
+                # for x in cur.fetchall():
+                #     print("|",x[0],"|",x[1],"|",x[2],"|")
+                # print("–––––––––––––––––––––––––––––––––")
 
                 
                 
                 count+=1                       #counts the number of drops and 
+                log("DEBUG", "Number of drops: %d" % count)
 
 
 
             if count == 30:             #send reminder to empty box
+                log("DEBUG", "Sending reminder")
                 sending_reminder()
                 count -= 5
 
             prev = lb
+            log("DEBUG", "New weight: %d" % prev)
 
             # To get weight from both channels (if you have load cells hooked up 
             # to both channel A and B), do something like this
@@ -162,27 +171,39 @@ def main():
             
             hx.power_down()
             hx.power_up()
-            time.sleep(15) #NOTE: fix this, too long in between weight calculations
 
-            if datetime.datetime.today().day == 1 and flag == 0:                            #send the csv email once on the First of every Month
+            log("DEBUG", "sleeping between drops...")
+            time.sleep(15) #NOTE: fix this, too long in between weight calculations
+            log("DEBUG", "Resuming!")
+
+            if datetime.today().day == 1 and flag == 0:     #send the csv email once on the First of every Month
+                log("DEBUG", "sending CSV")
                 sending_csv(filename)
                 flag = 1
-            elif datetime.datetime.today().day == 2 and flag == 1:                          #reset the flag on the day after
+            elif datetime.today().day == 2 and flag == 1:                          #reset the flag on the day after
+                log("DEBUG", "Resetting flag for sending the CSV")
                 flag = 0
 
 
-            if count > 0 and lb < .03 :
+            if count > 0 and lb < 0 :
+                log("DEBUG", "sleeping for removal...")
                 time.sleep(300)
+                log("DEBUG", "Resuming!")
+
+                log("DEBUG", "Resetting and Taring")
                 hx.reset()          #if officer meyer removes bin, give her 5 min to empty and replace bins. Then tare system and continue
                 hx.tare()
                 count = 0 
+                log("DEBUG", "Total drops: %d" % count)
 
-            sending_csv(filename)
+                sending_csv(filename)
 
         except (KeyboardInterrupt, SystemExit):
+            log("ERROR", "Exception, stpping.")
             sending_error()                  #if moving log.py, make sure to use full directory in place of filename
             cleanAndExit()
 
 
 if __name__ == "__main__":
+    log("DEBUG", "Starting main()")
     main()
