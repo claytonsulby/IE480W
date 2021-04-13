@@ -19,13 +19,13 @@ TWOCHANNEL = False
 
 referenceUnit = 387.018518
 
-def wait_for_connection( host, user, passwd, db ):
+def wait_for_connection( hostname, username, password, database ):
     while True:
         try:
             response = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
             return response
         except OSError:
-            pass
+            log("ERROR", "could not connect to database. Retrying...")
 
 
 def cleanAndExit():
@@ -91,7 +91,7 @@ def main():
     log("DEBUG", "Initializing Connection to host:%s db:%s user:%s" % (hostname, database, username))
     
     log("DEBUG", "Starting wait_for_connection()")
-    A2_connection = wait_for_connection( host=hostname, user=username, passwd=password, db=database )
+    A2_connection = wait_for_connection(hostname, username, password, database )
     # A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
 
     # csv file name
