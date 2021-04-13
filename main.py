@@ -19,6 +19,14 @@ TWOCHANNEL = False
 
 referenceUnit = 387.018518
 
+def wait_for_connection( host, user, passwd, db ):
+    while True:
+        try:
+            response = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
+            return response
+        except OSError:
+            pass
+
 
 def cleanAndExit():
     log("DEBUG", "Cleaning...")
@@ -81,7 +89,10 @@ def main():
     database = 'psupresc_dropbox'
 
     log("DEBUG", "Initializing Connection to host:%s db:%s user:%s" % (hostname, database, username))
-    A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
+    
+    log("DEBUG", "Starting wait_for_connection()")
+    A2_connection = wait_for_connection( host=hostname, user=username, passwd=password, db=database )
+    # A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
 
     # csv file name
     filename = "log.csv"
@@ -204,6 +215,6 @@ def main():
             cleanAndExit()
 
 
-if __name__ == "__main__":
-    log("DEBUG", "Starting main()")
+if __name__ == "__main__":    
+    log("INIT", "Starting main()")
     main()
