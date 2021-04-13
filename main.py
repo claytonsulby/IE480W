@@ -19,14 +19,17 @@ TWOCHANNEL = False
 
 referenceUnit = 387.018518
 
-def wait_for_connection( hostname, username, password, database ):
-    while True:
-        try:
-            response = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
-            return response
-        except OSError:
+def wait_for_connection(hostname, username, password, database):
+    try:
+        response = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
+        return response
+    except IOError, e:
+        if e.errno == 101:
             log("ERROR", "could not connect to database. Retrying...")
-
+            time.sleep(1)
+            wait_for_connection(hostname, username, password, database)
+        else:
+            raise
 
 def cleanAndExit():
     log("DEBUG", "Cleaning...")
