@@ -22,14 +22,11 @@ referenceUnit = 387.018518
 def wait_for_connection(hostname, username, password, database):
     try:
         response = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
-        return response
-    except IOError, e:
-        if e.errno == 101:
-            log("ERROR", "could not connect to database. Retrying...")
-            time.sleep(1)
-            wait_for_connection(hostname, username, password, database)
-        else:
-            raise
+        return
+    except:
+        log("ERROR", "could not connect to database. Retrying...")
+        time.sleep(1)
+        wait_for_connection(hostname, username, password, database)
 
 def cleanAndExit():
     log("DEBUG", "Cleaning...")
@@ -92,10 +89,13 @@ def main():
     database = 'psupresc_dropbox'
 
     log("DEBUG", "Initializing Connection to host:%s db:%s user:%s" % (hostname, database, username))
-    
+
     log("DEBUG", "Starting wait_for_connection()")
-    A2_connection = wait_for_connection(hostname, username, password, database )
-    # A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
+    wait_for_connection(hostname, username, password, database )
+
+    
+    
+    A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
 
     # csv file name
     filename = "log.csv"
@@ -218,6 +218,8 @@ def main():
             cleanAndExit()
 
 
-if __name__ == "__main__":    
+if __name__ == "__main__": 
+
+
     log("INIT", "Starting main()")
     main()
