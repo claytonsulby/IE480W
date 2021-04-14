@@ -19,8 +19,8 @@ main = sys.modules[__name__]
 DEBUG = False
 TWOCHANNEL = False
 
-referenceUnit = 387.018518
-# referenceUnit = 102
+# referenceUnit = 387.018518
+referenceUnit = 102
 
 def wait_for_connection(hostname, username, password, database):
     try:

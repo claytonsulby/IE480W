@@ -11,7 +11,7 @@ from email import encoders
 
 sender_email = 'psu.prescriptiondropbox@gmail.com'
 password = 'xafze5-tAsted-jaznix'
-receiver_emails = ["cls6275@psu.edu", "claytonsulby@gmail.com"]
+receiver_emails = ["jbm203@psu.edu", "pmg14@psu.edu", "jaw900@psu.edu", "dak27@psu.edu"]
 
 def append_list_as_row(file_name, list_of_elem):
     # Open file in append mode
