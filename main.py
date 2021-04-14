@@ -140,7 +140,11 @@ def main():
                 row_contents = [timeStamp.strftime("%x"),timeStamp.strftime("%X"),str(roundedDiff)]       #setting the values for the new row entry
                 log("DEBUG", "Row Contents:" + ", ".join(row_contents))
 
-                append_list_as_row(filename, row_contents)      #appending new row entry to the log.csv
+                try:
+                    append_list_as_row(filename, row_contents)      #appending new row entry to the log.csv
+                except:
+                    log("ERROR","could not append to csv file")
+                    pass
 
                 cur = A2_connection.cursor()
                 A2_sql_insert = insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (timeStamp.strftime("%Y-%m-%d"), timeStamp.strftime("%H:%M:%S"), float(roundedDiff))

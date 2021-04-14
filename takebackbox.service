@@ -1,0 +1,13 @@
+[Unit]
+Description=Takeback Box Background Program
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=idle
+User=pi
+ExecStart=/usr/bin/python3 /home/pi/Capstone/IE480W/main.py &  > /home/pi/Capst$
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
