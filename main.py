@@ -19,8 +19,8 @@ main = sys.modules[__name__]
 DEBUG = False
 TWOCHANNEL = False
 
-# referenceUnit = 387.018518
-referenceUnit = 102
+referenceUnit = 387.018518
+# referenceUnit = 102
 
 def wait_for_connection(hostname, username, password, database):
     try:
@@ -42,11 +42,11 @@ def cleanAndExit():
 
 
 def main():
-    
-    sending_reminder()
+
     sending_error()
-    
-    
+    sending_reminder()
+
+
     hx = HX711(5, 6)
 
     # I've found out that, for some reason, the order of the bytes is not always the same between versions of python, numpy and the hx711 itself.
