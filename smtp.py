@@ -11,7 +11,7 @@ from email import encoders
 
 sender_email = 'psu.prescriptiondropbox@gmail.com'
 password = 'xafze5-tAsted-jaznix'
-receiver_email = 'claytonsulby@gmail.com'
+receiver_emails = ["claytonsulby@gmail.com", "cls6275@psu.edu"]
 
 def append_list_as_row(file_name, list_of_elem):
     # Open file in append mode
@@ -26,7 +26,7 @@ def append_list_as_row(file_name, list_of_elem):
 def sending_csv (file):
     message = MIMEMultipart()
     message["From"] = sender_email
-    message["To"] = receiver_email
+    message["To"] = ", ".join(receiver_emails)
     monthStamp = datetime.now()         #finding the time
     monthStamp = monthStamp.strftime("%B %Y")
 
@@ -57,7 +57,7 @@ def sending_csv (file):
 def sending_reminder():
     message = MIMEMultipart()
     message["From"] = sender_email
-    message["To"] = receiver_email
+    message["To"] = ", ".join(receiver_emails)
     message["Subject"] = "Empty Prescription DropBox"
 
     Body = "30+ Prescription drops have been made! Please empty as soon as possible."
@@ -76,7 +76,7 @@ def sending_reminder():
 def sending_error():
     message = MIMEMultipart()
     message["From"] = sender_email
-    message["To"] = receiver_email
+    message["To"] = ", ".join(receiver_emails)
     message["Subject"] = "Reset System ASAP"
 
     my_message = "The Raspberry Pi has malfunctioned and needs to be reset as soon as possible. Please press the power button twice so that the red light turns off and on again.\n\nThank you!"

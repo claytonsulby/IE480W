@@ -19,7 +19,8 @@ main = sys.modules[__name__]
 DEBUG = False
 TWOCHANNEL = False
 
-referenceUnit = 387.018518
+# referenceUnit = 387.018518
+referenceUnit = 102
 
 def wait_for_connection(hostname, username, password, database):
     try:
@@ -145,13 +146,16 @@ def main():
                 try:
                     append_list_as_row(filename, row_contents)      #appending new row entry to the log.csv
                 except:
-                    log("ERROR","could not append to csv file")
+                    log("ERROR","could not append to csv file.")
                     pass
 
                 try:
                     if main.connection.open:
-
+                        
+                        log("DEBUG", "connection open.")
+                        log("DEBUG", "pinging connection. Retrying if no ping...")
                         main.connection.ping(reconnect=True) 
+                        log("DEBUG", "ping received, connection active.")
 
                         cur = main.connection.cursor()
                         A2_sql_insert = insert = "INSERT INTO t1(id, datetime, weight) VALUES ('%s', '%s', '%1.2f');" % (main.id, timeStamp.strftime("%Y-%m-%d %H:%M:%S"), float(roundedDiff))

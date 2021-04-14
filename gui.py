@@ -84,7 +84,7 @@ if __name__ == "__main__":
         tempStartDate = datetime.strptime(startDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
         tempEndDate = datetime.strptime(endDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
         
-        select = "SELECT * FROM t1 WHERE datetime BETWEEN '%s' AND '%s';" % (tempStartDate, tempEndDate)
+        select = "SELECT * FROM t1 WHERE datetime BETWEEN '%s' AND '%s' AND id <> '%s';" % (tempStartDate, tempEndDate, "dropboxtest1")
         
         # select = "SELECT * FROM t1;"
         
