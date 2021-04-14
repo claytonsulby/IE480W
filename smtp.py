@@ -11,7 +11,7 @@ from email import encoders
 
 sender_email = 'psu.prescriptiondropbox@gmail.com'
 password = 'xafze5-tAsted-jaznix'
-receiver_emails = ["claytonsulby@gmail.com", "cls6275@psu.edu"]
+receiver_emails = ["cls6275@psu.edu", "claytonsulby@gmail.com"]
 
 def append_list_as_row(file_name, list_of_elem):
     # Open file in append mode
@@ -49,7 +49,7 @@ def sending_csv (file):
     email_session.starttls()
     email_session.login(sender_email, password)
 
-    email_session.sendmail(sender_email,receiver_email,my_message)
+    email_session.sendmail(sender_email,receiver_emails,my_message)
     email_session.quit()
 
 
@@ -68,7 +68,7 @@ def sending_reminder():
     email_session.starttls()
     email_session.login(sender_email, password)
 
-    email_session.sendmail(sender_email,receiver_email, Body)
+    email_session.sendmail(sender_email,receiver_emails, Body)
     email_session.quit()
 
 
@@ -86,5 +86,5 @@ def sending_error():
     email_session.starttls()
     email_session.login(sender_email, password)
 
-    email_session.sendmail(sender_email,receiver_email,my_message)
+    email_session.sendmail(sender_email,receiver_emails,my_message)
     email_session.quit()
