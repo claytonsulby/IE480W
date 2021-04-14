@@ -12,16 +12,18 @@ from log import *
 import RPi.GPIO as GPIO
 from hx711 import HX711
 
+import sys
+
+main = sys.modules[__name__]
+
 DEBUG = False
 TWOCHANNEL = False
-
-
 
 referenceUnit = 387.018518
 
 def wait_for_connection(hostname, username, password, database):
     try:
-        response = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
+        main.connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
         return
     except:
         log("ERROR", "could not connect to database. Retrying...")
@@ -95,7 +97,7 @@ def main():
 
     
     
-    A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
+    #A2_connection = pymysql.connect( host=hostname, user=username, passwd=password, db=database )
 
     # csv file name
     filename = "log.csv"
@@ -146,14 +148,28 @@ def main():
                     log("ERROR","could not append to csv file")
                     pass
 
-                cur = A2_connection.cursor()
-                A2_sql_insert = insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (timeStamp.strftime("%Y-%m-%d"), timeStamp.strftime("%H:%M:%S"), float(roundedDiff))
-                commit = "COMMIT;"
+                try:
+                    if main.connection.open:
 
-                log("DEBUG", "Executing SQL Insert" + A2_sql_insert)
+                        main.connection.ping(reconnect=True) 
 
-                cur.execute( A2_sql_insert )
-                cur.execute( commit )
+                        cur = main.connection.cursor()
+                        A2_sql_insert = insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (timeStamp.strftime("%Y-%m-%d"), timeStamp.strftime("%H:%M:%S"), float(roundedDiff))
+                        commit = "COMMIT;"
+
+                        log("DEBUG", "Executing SQL Insert" + A2_sql_insert)
+
+                        cur.execute( A2_sql_insert )
+                        cur.execute( commit )
+                    else:
+                        log("ERROR","connection not open. Retrying...")
+                        wait_for_connection(hostname, username, password, database)
+                        pass
+                except:
+                    log("ERROR", "connection lost. Retrying...")
+                    wait_for_connection(hostname, username, password, database)
+                    pass
+
 
 
                 # select = "SELECT * FROM t1;"
@@ -203,7 +219,7 @@ def main():
                 flag = 0
 
 
-            if count > 0 and lb < 0 :
+            if count > 0 and lb < -1 :
                 log("DEBUG", "sleeping for removal...")
                 time.sleep(300)
                 log("DEBUG", "Resuming!")
