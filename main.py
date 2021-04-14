@@ -154,7 +154,7 @@ def main():
                         main.connection.ping(reconnect=True) 
 
                         cur = main.connection.cursor()
-                        A2_sql_insert = insert = "INSERT INTO t1(date, time, weight) VALUES ('%s', '%s', '%1.2f');" % (timeStamp.strftime("%Y-%m-%d"), timeStamp.strftime("%H:%M:%S"), float(roundedDiff))
+                        A2_sql_insert = insert = "INSERT INTO t1(id, datetime, weight) VALUES ('%s', '%s', '%1.2f');" % (main.id, timeStamp.strftime("%Y-%m-%d %H:%M:%S"), float(roundedDiff))
                         commit = "COMMIT;"
 
                         log("DEBUG", "Executing SQL Insert" + A2_sql_insert)
@@ -240,6 +240,7 @@ def main():
 
 if __name__ == "__main__": 
 
+    main.id = "psudropbox1"
 
     log("INIT", "Starting main()")
     main()

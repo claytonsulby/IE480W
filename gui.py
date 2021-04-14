@@ -19,7 +19,7 @@ if __name__ == "__main__":
         listbox.delete(0, END)
         list = selectToCSV()
         i = 0
-        listbox.insert(END, ['index', 'date', 'time', 'weight'])
+        listbox.insert(END, ['index', 'id', 'datetime', 'weight'])
         for row in list:
             x = [i] + row[1:]
             listbox.insert(END, x)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         tempStartDate = datetime.strptime(startDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
         tempEndDate = datetime.strptime(endDate, '%m/%d/%y').strftime("%Y-%m-%d %H:%M:%S")
         
-        select = "SELECT * FROM t1 WHERE date BETWEEN '%s' AND '%s';" % (tempStartDate, tempEndDate)
+        select = "SELECT * FROM t1 WHERE datetime BETWEEN '%s' AND '%s';" % (tempStartDate, tempEndDate)
         
         # select = "SELECT * FROM t1;"
         
